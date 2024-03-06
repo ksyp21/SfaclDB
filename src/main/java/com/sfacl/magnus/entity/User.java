@@ -10,6 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -32,6 +33,28 @@ public class User implements UserDetails {
 
     @Column(name = "last_password_change")
     private LocalDate lastPasswordChange;
+
+
+    @ElementCollection
+    @CollectionTable(name = "user_password_history", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "password")
+    private List<String> passwordHistory = new ArrayList<>();
+
+    // Method to add a password to the password history
+    public void addPasswordToHistory(String password) {
+        passwordHistory.add(password);
+        // Ensure that only the last two passwords are stored in history
+        if (passwordHistory.size() > 2) {
+            passwordHistory.remove(0);
+        }
+    }
+    public String getSecondLastPassword() {
+        if (passwordHistory.size() >= 2) {
+            return passwordHistory.get(passwordHistory.size() - 2);
+        }
+        return null;
+    }
+
 
 
     @OneToMany(mappedBy = "user")

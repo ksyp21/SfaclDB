@@ -3,12 +3,15 @@ package com.sfacl.magnus.config;
 import com.sfacl.magnus.entity.User;
 import com.sfacl.magnus.entity.UserRecord;
 import com.sfacl.magnus.repository.UserRepository;
+import com.sfacl.magnus.service.PasswordExpirationService;
 import com.sfacl.magnus.service.UserRecordService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,8 +22,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Optional;
+
+import static net.sf.jsqlparser.util.validation.metadata.NamedObject.user;
 
 @Component
 @RequiredArgsConstructor
@@ -31,12 +37,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserRecordService userRecordService;
     private final UserRepository userRepository;
 
+
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
+
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String userEmail;
@@ -66,6 +74,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
         filterChain.doFilter(request, response);
+
     }
     private void recordUserLogin(User user) {
         // Create a UserRecord object and set the login time and user ID
@@ -85,8 +94,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // Update the UserRecord object with the logout time
         userRecordService.save(userRecord);
     }
-
-
 
 
 
